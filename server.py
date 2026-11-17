@@ -227,6 +227,11 @@ class Handler(SimpleHTTPRequestHandler):
             self.path = "/templates/index.html"
             return SimpleHTTPRequestHandler.do_GET(self)
 
+        if path == "/enviar-data":
+            # Formulario para enviar datos de prueba a /api/sensor
+            self.path = "/templates/enviar.html"
+            return SimpleHTTPRequestHandler.do_GET(self)
+
         if path.startswith("/static/"):
             return SimpleHTTPRequestHandler.do_GET(self)
 
