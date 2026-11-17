@@ -1,0 +1,9 @@
+# Local: publica el puerto 5000 en tu máquina (uso: docker compose -f docker-compose-local.yml up -d --build)
+services:
+  smoke-to-power:
+    build: .
+    image: smoke-to-power:latest
+    container_name: smoke-to-power
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
