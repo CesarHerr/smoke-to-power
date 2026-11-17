@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smoke to Power | Dashboard IoT</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">⚡</div>
+        <div>
+          <h1>Smoke to Power</h1>
+          <p class="subtitle">Monitoreo IoT · Filtro + Termoelectricidad</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="sim-badge" id="simBadge">
+          <span class="dot"></span>
+          <span id="simText">Simulación ON</span>
+        </div>
+        <div class="last-update" id="lastUpdate">—</div>
+      </div>
+    </header>
+
+    <!-- Alerta -->
+    <div class="alert-banner" id="alertBanner" hidden>
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-text">
+        <strong>¡PELIGRO! Limpiar filtro inmediatamente</strong>
+        <span>Obstrucción crítica detectada (≥ 80%)</span>
+      </div>
+    </div>
+
+    <!-- Tarjetas principales -->
+    <section class="cards">
+      <!-- Filtro -->
+      <article class="card card-filter" id="cardFilter">
+        <div class="card-header">
+          <span class="card-icon">🔧</span>
+          <h2>Estado del Filtro</h2>
+        </div>
+        <div class="card-body">
+          <div class="gauge-container">
+            <div class="gauge" id="filterGauge">
+              <div class="gauge-fill" id="filterFill"></div>
+              <div class="gauge-center">
+                <span class="gauge-value" id="filterValue">--</span>
+                <span class="gauge-unit">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="status-pill" id="filterStatus">—</div>
+          <p class="card-desc">Obstrucción del filtro de humo (presión diferencial / flujo)</p>
+        </div>
+      </article>
+
+      <!-- Energía -->
+      <article class="card card-energy">
+        <div class="card-header">
+          <span class="card-icon">⚡</span>
+          <h2>Generación de Energía</h2>
+        </div>
+        <div class="card-body energy-body">
+          <div class="energy-main">
+            <div class="energy-block">
+              <span class="label">Potencia actual</span>
+              <div class="value-row">
+                <span class="big-value" id="powerValue">--</span>
+                <span class="unit">W</span>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="energy-block">
+              <span class="label">Energía hoy</span>
+              <div class="value-row">
+                <span class="big-value" id="energyValue">--</span>
+                <span class="unit">kWh</span>
+              </div>
+            </div>
+          </div>
+          <p class="card-desc">Módulo termoeléctrico en el cañón de humo</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Gráficos -->
+    <section class="charts">
+      <article class="chart-card">
+        <div class="chart-header">
+          <h3>Potencia generada (últimas 24 h)</h3>
+          <span class="chart-legend power-legend">W</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="powerChart"></canvas>
+        </div>
+      </article>
+
+      <article class="chart-card">
+        <div class="chart-header">
+          <h3>Obstrucción del filtro (últimas 24 h)</h3>
+          <span class="chart-legend filter-legend">%</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="filterChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <!-- Controles -->
+    <section class="controls">
+      <button class="btn btn-sim" id="btnSim" title="Alternar modo simulación">
+        🔄 Toggle Simulación
+      </button>
+      <button class="btn btn-reset" id="btnReset" title="Reiniciar energía e historial">
+        ↺ Reiniciar datos
+      </button>
+      <div class="info-box">
+        <strong>ESP32 →</strong> POST <code>/api/sensor</code>
+        <span class="mono">{"filter": 45.2, "power": 18.7}</span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Smoke to Power · Dashboard IoT · Datos en tiempo real vía Wi-Fi
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
