@@ -8,7 +8,6 @@ const POLL_MS = 3000;
 // DOM
 const $ = (sel) => document.querySelector(sel);
 const filterValue = $('#filterValue');
-const filterFill = $('#filterFill'); // no usado (conic-gradient)
 const filterGauge = $('#filterGauge');
 const filterStatus = $('#filterStatus');
 const cardFilter = $('#cardFilter');
@@ -17,8 +16,12 @@ const energyValue = $('#energyValue');
 const alertBanner = $('#alertBanner');
 const lastUpdate = $('#lastUpdate');
 const simBadge = $('#simBadge');
-const simText = $('#simText');
+const simLabel = $('#simLabel');
+const simSub = $('#simSub');
 const btnSim = $('#btnSim');
+const btnSimText = $('#btnSimText');
+const simHint = $('#simHint');
+let simulationOn = false;
 const btnReset = $('#btnReset');
 
 // Charts
@@ -187,21 +190,47 @@ function updateUI(state) {
   // Last update
   lastUpdate.textContent = 'Actualizado: ' + formatTime(state.last_update);
 
-  // Simulation badge
-  if (state.simulation_mode) {
-    simBadge.classList.remove('off');
-    simText.textContent = 'Simulación ON';
+  renderMode(state);
+}
+
+// Muestra claramente de dónde vienen los datos y qué hará el botón
+function renderMode(state) {
+  const mode = state.data_source || 'waiting';
+  const secs = state.seconds_since_real;
+  simulationOn = !!state.simulation_mode;
+
+  simBadge.dataset.mode = mode;
+
+  if (mode === 'simulation') {
+    simLabel.textContent = 'SIMULACIÓN ACTIVA';
+    simSub.textContent = 'Datos de prueba generados por el servidor';
+  } else if (mode === 'real') {
+    simLabel.textContent = 'DATOS REALES · ESP32';
+    simSub.textContent = `Último dato hace ${secs ?? 0} s`;
   } else {
-    simBadge.classList.add('off');
-    simText.textContent = 'Datos reales';
+    simLabel.textContent = 'SIN DATOS DEL ESP32';
+    simSub.textContent = secs != null
+      ? `Último dato hace ${secs} s`
+      : 'Aún no se han recibido datos reales';
+  }
+
+  btnSimText.textContent = simulationOn ? 'Detener simulación' : 'Iniciar simulación';
+  btnSim.classList.toggle('is-on', simulationOn);
+
+  if (simulationOn) {
+    simHint.textContent = 'Los valores que ves son ficticios. Si el ESP32 envía datos, la simulación se detiene sola.';
+  } else if (mode === 'real') {
+    simHint.textContent = 'Mostrando datos reales del ESP32.';
+  } else {
+    simHint.textContent = 'No llegan datos del ESP32. Verifica que esté encendido y conectado a la red, o inicia la simulación para probar.';
   }
 }
 
 function updateCharts(history) {
   if (!history || !history.length) return;
 
-  // Limitar a ~120 puntos para rendimiento (últimas ~10 min en simulación de 5s)
-  const data = history.slice(-120);
+  // El servidor ya devuelve un máximo de ~300 puntos muestreados de las últimas 24 h
+  const data = history;
 
   const labels = data.map(h => formatChartLabel(h.timestamp));
   const powers = data.map(h => h.power);
@@ -241,8 +270,7 @@ async function poll() {
 }
 
 async function toggleSimulation() {
-  const isOn = !simBadge.classList.contains('off');
-  const action = isOn ? 'stop' : 'start';
+  const action = simulationOn ? 'stop' : 'start';
   try {
     const res = await fetch('/api/simulation', {
       method: 'POST',
@@ -262,7 +290,11 @@ async function toggleSimulation() {
 async function resetData() {
   if (!confirm('¿Reiniciar energía del día e historial?')) return;
   try {
-    await fetch('/api/reset', { method: 'POST' });
+    await fetch('/api/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
     await poll();
   } catch (err) {
     console.error('Error reset:', err);

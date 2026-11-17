@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smoke to Power | Dashboard IoT</title>
   <link rel="stylesheet" href="/static/css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/static/js/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -22,9 +22,12 @@
         </div>
       </div>
       <div class="header-right">
-        <div class="sim-badge" id="simBadge">
+        <div class="sim-badge" id="simBadge" data-mode="waiting">
           <span class="dot"></span>
-          <span id="simText">Simulación ON</span>
+          <div class="sim-text">
+            <span class="sim-label" id="simLabel">Conectando…</span>
+            <span class="sim-sub" id="simSub"></span>
+          </div>
         </div>
         <div class="last-update" id="lastUpdate">—</div>
       </div>
@@ -50,7 +53,6 @@
         <div class="card-body">
           <div class="gauge-container">
             <div class="gauge" id="filterGauge">
-              <div class="gauge-fill" id="filterFill"></div>
               <div class="gauge-center">
                 <span class="gauge-value" id="filterValue">--</span>
                 <span class="gauge-unit">%</span>
@@ -116,8 +118,8 @@
 
     <!-- Controles -->
     <section class="controls">
-      <button class="btn btn-sim" id="btnSim" title="Alternar modo simulación">
-        🔄 Toggle Simulación
+      <button class="btn btn-sim" id="btnSim" title="Iniciar o detener la simulación de datos">
+        <span id="btnSimText">Iniciar simulación</span>
       </button>
       <button class="btn btn-reset" id="btnReset" title="Reiniciar energía e historial">
         ↺ Reiniciar datos
@@ -127,6 +129,7 @@
         <span class="mono">{"filter": 45.2, "power": 18.7}</span>
       </div>
     </section>
+    <p class="sim-hint" id="simHint"></p>
 
     <footer class="footer">
       Smoke to Power · Dashboard IoT · Datos en tiempo real vía Wi-Fi

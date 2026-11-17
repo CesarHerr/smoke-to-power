@@ -11,32 +11,33 @@ Diseñada para recibir datos de un **ESP32** vía Wi-Fi.
 
 - Dashboard con 2 tarjetas grandes en tiempo real
 - Colores del filtro: **Verde** (Limpio) · **Amarillo** (Sucio) · **Rojo** (Bloqueado)
-- Gráficos históricos (Chart.js) de las últimas 24 h
+- Gráficos históricos (Chart.js, incluido localmente) de las últimas 24 h
 - Alerta crítica cuando la obstrucción ≥ 80 %
 - **Modo Simulación** (datos realistas cada 5 s) para probar sin hardware
 - Endpoint REST listo para el ESP32
-- **Cero dependencias externas** (solo Python estándar)
+- **Backend sin dependencias de Python** (solo librería estándar)
 
 ## Cómo arrancar
+
+### Opción 1: Python
 
 ```bash
 cd smoke-to-power
 python3 server.py
 ```
 
-Abre en el navegador: **http://localhost:5000**
-
-> El modo simulación se inicia automáticamente.  
-> Puedes detenerlo/reanudarlo con el botón del dashboard.
-
-### Alternativa con Flask (opcional)
-
-Si prefieres Flask:
+### Opción 2: Docker Compose
 
 ```bash
-pip install -r requirements.txt
-python app.py
+docker compose up -d --build   # construir y levantar
+docker compose logs -f         # ver logs
+docker compose down            # detener
 ```
+
+Abre en el navegador: **http://localhost:5000**
+
+> El modo simulación se inicia automáticamente.
+> Puedes detenerlo/reanudarlo con el botón del dashboard.
 
 ## API para el ESP32
 
@@ -46,20 +47,25 @@ Content-Type: application/json
 
 {
   "filter": 45.2,   // % obstrucción (0-100)
-  "power": 18.7     // Watts actuales
+  "power": 18.7     // Watts actuales (números, no texto)
 }
 ```
 
 Al recibir datos reales se detiene automáticamente la simulación.
+Si `filter` o `power` faltan o no son números, responde `400`.
 
 ### Otros endpoints
 
-| Método | Ruta              | Descripción                          |
-|--------|-------------------|--------------------------------------|
-| GET    | `/api/status`     | Estado actual                        |
-| GET    | `/api/history`    | Historial (últimas 24 h)             |
-| POST   | `/api/simulation` | `{"action": "start"}` o `"stop"`     |
-| POST   | `/api/reset`      | Reinicia energía e historial         |
+| Método | Ruta              | Descripción                                                        |
+|--------|-------------------|--------------------------------------------------------------------|
+| GET    | `/api/status`     | Estado actual                                                      |
+| GET    | `/api/history`    | Historial de las últimas 24 h, muestreado a 300 puntos (`?points=N`, máx. 2000) |
+| POST   | `/api/simulation` | `{"action": "start"}` o `"stop"`                                   |
+| POST   | `/api/reset`      | Reinicia energía, valores e historial                              |
+
+Todos los `POST` requieren `Content-Type: application/json` (responden `415` si no).
+
+> **Seguridad:** la API no tiene autenticación. Úsala solo en una red local de confianza y no expongas el puerto 5000 a internet.
 
 ## Ejemplo de código ESP32 (Arduino)
 
@@ -113,14 +119,16 @@ void loop() {
 
 ```
 smoke-to-power/
-├── server.py          # Backend (Python stdlib) ← usar este
-├── app.py             # Backend alternativo (Flask)
-├── requirements.txt
+├── server.py            # Backend (Python stdlib)
+├── Dockerfile
+├── docker-compose.yml
 ├── templates/
 │   └── index.html
 └── static/
     ├── css/style.css
-    └── js/app.js
+    └── js/
+        ├── app.js
+        └── chart.umd.min.js   # Chart.js 4.4.1 (local)
 ```
 
 ---

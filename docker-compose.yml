@@ -1,0 +1,8 @@
+services:
+  smoke-to-power:
+    build: .
+    image: smoke-to-power:latest
+    container_name: smoke-to-power
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
