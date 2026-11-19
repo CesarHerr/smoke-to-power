@@ -63,12 +63,10 @@ body {
 .logo {
   width: 52px;
   height: 52px;
-  background: linear-gradient(135deg, #00d4aa, #38bdf8);
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  font-size: 26px;
-  box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgba(0, 212, 170, 0.25));
 }
 
 .brand h1 {
